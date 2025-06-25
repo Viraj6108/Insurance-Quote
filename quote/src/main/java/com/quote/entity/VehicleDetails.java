@@ -18,6 +18,9 @@ public class VehicleDetails {
     private String registrationNumber;
     private double showroomPrice;
     private int engineCapacity;
+    private String manufacturer;
+    private int yearOfManufacture;
+    private String chassisNumber;
 
     public int getEngineCapacity() {
         return engineCapacity;
@@ -65,5 +68,29 @@ public class VehicleDetails {
 
     public void setShowroomPrice(double showroomPrice) {
         this.showroomPrice = showroomPrice;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    public int getYearOfManufacture() {
+        return yearOfManufacture;
+    }
+
+    public void setYearOfManufacture(int yearOfManufacture) {
+        this.yearOfManufacture = yearOfManufacture;
+    }
+
+    public String getChassisNumber() {
+        return chassisNumber;
+    }
+
+    public void setChassisNumber(String chassisNumber) {
+        this.chassisNumber = chassisNumber;
     }
 }

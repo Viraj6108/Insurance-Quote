@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.gson.Gson;
 import com.quote.dto.QuoteAccepted;
 import com.quote.dto.QuoteDTO;
-import com.quote.dto.VehicleDetailsDTO;
 import com.quote.entity.Quote;
 import com.quote.exception.QuoteException;
+import com.quote.mapper.Mapper;
 import com.quote.repository.QuoteRepository;
 import com.quote.service.QuoteService;
 import org.modelmapper.ModelMapper;
@@ -28,9 +29,8 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
-    @Autowired
-    private ModelMapper modelMapper;
-
+    ModelMapper modelMapper = new ModelMapper();
+    Gson gson = new Gson();
     ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public Quote createQuote(QuoteDTO quote) throws QuoteException, JsonProcessingException {
@@ -40,11 +40,10 @@ public class QuoteServiceImpl implements QuoteService {
     newQuote.setPremiumAmount(calculatePremium(quote.getSumInsured(),quote.getVehicleDetails().getEngineCapacity(),quote.getCoverageType()));
     objectMapper.registerModule(new JavaTimeModule());
     newQuote.setQuoteStatus(Quote.QUOTE_STATUS.PENDING);
-//    String data = objectMapper.writeValueAsString(newQuote);
-//    kafkaTemplate.send("quote-created",data);
         return quoteRepository.save(newQuote);
     }
 
+    Mapper mapper = new Mapper();
     @Override
     public String acceptQuote(UUID quoteId) throws QuoteException, JsonProcessingException {
         Quote existingQuote = quoteRepository.findById(quoteId).
@@ -55,19 +54,23 @@ public class QuoteServiceImpl implements QuoteService {
         existingQuote.setQuoteStatus(Quote.QUOTE_STATUS.ACCEPTED);
         quoteRepository.save(existingQuote);
         objectMapper.disable(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_TIMES);
-        //This is used to crete map of the modelmapper because it cannot map objects inside objects
-       QuoteAccepted quoteAccepted = modelMapper.map(existingQuote,QuoteAccepted.class);
+        //TYpe map for dto
+        QuoteAccepted quoteAccepted = mapper.toDTO(existingQuote);
         String quote = objectMapper.writeValueAsString(quoteAccepted);
         kafkaTemplate.send("quote-accepted",quote);
         return "ACCEPTED";
     }
 
+    
     public Integer calculateSumInsured(double showroomPrice, LocalDate purchaseYear)
     {
         double depreciation = CalculateDepreciation(purchaseYear);
         double sumInsured = showroomPrice * (1 - depreciation);
         return (int) sumInsured; // Rounded to nearest integer
     }
+    
+    
+    
     //Calculate premium and return the premium
     public double calculatePremium(double sumInsured,int engineCapacity,String coverageType)
     {

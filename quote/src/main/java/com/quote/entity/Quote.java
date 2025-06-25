@@ -1,4 +1,4 @@
-package com.quote.entity;
+	package com.quote.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -24,7 +24,23 @@ public class Quote {
     public  enum QUOTE_STATUS{
         PENDING, ACCEPTED, REJECTED
     }
+    private String coverageType;
     private QUOTE_STATUS quoteStatus;
+
+    public Quote() {
+    }
+
+    public Quote(UUID quoteId, UUID userId, double sumInsured, double premiumAmount, LocalDateTime createdAt, VehicleDetails vehicleDetails, String coverageType, QUOTE_STATUS quoteStatus) {
+        this.quoteId = quoteId;
+        this.userId = userId;
+        this.sumInsured = sumInsured;
+        this.premiumAmount = premiumAmount;
+        this.createdAt = createdAt;
+        this.vehicleDetails = vehicleDetails;
+        this.coverageType = coverageType;
+        this.quoteStatus = quoteStatus;
+    }
+
     public String getCoverageType() {
         return coverageType;
     }
@@ -33,7 +49,7 @@ public class Quote {
         this.coverageType = coverageType;
     }
 
-    private String coverageType;
+
 
     public UUID getQuoteId() {
         return quoteId;
